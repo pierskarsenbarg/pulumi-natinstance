@@ -8,9 +8,9 @@ using System.Threading.Tasks;
 using Pulumi.Serialization;
 using Pulumi;
 
-namespace PiersKarsenbarg.Nat
+namespace PiersKarsenbarg.Natinstance
 {
-    [NatResourceType("nat:index:NatInstance")]
+    [NatinstanceResourceType("natinstance:index:NatInstance")]
     public partial class NatInstance : global::Pulumi.ComponentResource
     {
         /// <summary>
@@ -31,7 +31,7 @@ namespace PiersKarsenbarg.Nat
         /// <param name="args">The arguments used to populate this resource's properties</param>
         /// <param name="options">A bag of options that control this resource's behavior</param>
         public NatInstance(string name, NatInstanceArgs args, ComponentResourceOptions? options = null)
-            : base("nat:index:NatInstance", name, args ?? new NatInstanceArgs(), MakeResourceOptions(options, ""), remote: true)
+            : base("natinstance:index:NatInstance", name, args ?? new NatInstanceArgs(), MakeResourceOptions(options, ""), remote: true)
         {
         }
 
@@ -40,7 +40,7 @@ namespace PiersKarsenbarg.Nat
             var defaultOptions = new ComponentResourceOptions
             {
                 Version = Utilities.Version,
-                PluginDownloadURL = "github://api.github.com/pierskarsenbarg/pulumi-nat",
+                PluginDownloadURL = "github://api.github.com/pierskarsenbarg/pulumi-natinstance",
             };
             var merged = ComponentResourceOptions.Merge(defaultOptions, options);
             // Override the ID if one was specified for consistency with other language SDKs.

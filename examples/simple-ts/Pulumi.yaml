@@ -1,0 +1,14 @@
+name: natinstance-simple-ts
+description: A minimal AWS TypeScript Pulumi program
+runtime:
+  name: nodejs
+  options:
+    packagemanager: npm
+plugins:
+  providers:
+    - name: natinstance
+      path: ../../bin
+config:
+  pulumi:tags:
+    value:
+      pulumi:template: aws-typescript

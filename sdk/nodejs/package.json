@@ -1,6 +1,6 @@
 {
-    "name": "@pierskarsenbarg/nat",
-    "version": "${VERSION}",
+    "name": "@pierskarsenbarg/natinstance",
+    "version": "0.0.1",
     "scripts": {
         "build": "tsc"
     },
@@ -15,7 +15,8 @@
     },
     "pulumi": {
         "resource": true,
-        "name": "nat",
-        "server": "github://api.github.com/pierskarsenbarg/pulumi-nat"
+        "name": "natinstance",
+        "version": "0.0.1",
+        "server": "github://api.github.com/pierskarsenbarg/pulumi-natinstance"
     }
 }

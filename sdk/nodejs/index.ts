@@ -20,18 +20,18 @@ const _module = {
     version: utilities.getVersion(),
     construct: (name: string, type: string, urn: string): pulumi.Resource => {
         switch (type) {
-            case "nat:index:NatInstance":
+            case "natinstance:index:NatInstance":
                 return new NatInstance(name, <any>undefined, { urn })
             default:
                 throw new Error(`unknown resource type ${type}`);
         }
     },
 };
-pulumi.runtime.registerResourceModule("nat", "index", _module)
-pulumi.runtime.registerResourcePackage("nat", {
+pulumi.runtime.registerResourceModule("natinstance", "index", _module)
+pulumi.runtime.registerResourcePackage("natinstance", {
     version: utilities.getVersion(),
     constructProvider: (name: string, type: string, urn: string): pulumi.ProviderResource => {
-        if (type !== "pulumi:providers:nat") {
+        if (type !== "pulumi:providers:natinstance") {
             throw new Error(`unknown provider type ${type}`);
         }
         return new Provider(name, <any>undefined, { urn });

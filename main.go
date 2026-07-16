@@ -37,10 +37,12 @@ func provider() p.Provider {
 			Description: "Pulumi Component to create a nat instance",
 			LanguageMap: map[string]any{
 				"go": gen.GoPackageInfo{
-					ImportBasePath: fmt.Sprintf("github.com/pierskarsenbarg/pulumi-%s/sdk/go/%s", providerName, providerName),
+					RespectSchemaVersion: true,
+					ImportBasePath:       fmt.Sprintf("github.com/pierskarsenbarg/pulumi-%s/sdk/go/%s", providerName, providerName),
 				},
 				"nodejs": nodejsgen.NodePackageInfo{
-					PackageName: fmt.Sprintf("@pierskarsenbarg/%s", providerName),
+					RespectSchemaVersion: true,
+					PackageName:          fmt.Sprintf("@pierskarsenbarg/%s", providerName),
 					Dependencies: map[string]string{
 						"@pulumi/pulumi": "^3.0.0",
 						"@pulumi/aws":    "^7.0.0",
@@ -51,13 +53,15 @@ func provider() p.Provider {
 					},
 				},
 				"csharp": dotnetgen.CSharpPackageInfo{
-					RootNamespace: "PiersKarsenbarg",
+					RespectSchemaVersion: true,
+					RootNamespace:        "PiersKarsenbarg",
 					PackageReferences: map[string]string{
 						"Pulumi":     "3.*",
 						"Pulumi.Aws": "7.*",
 					},
 				},
 				"python": pythongen.PackageInfo{
+					RespectSchemaVersion: true,
 					Requires: map[string]string{
 						"pulumi":     ">=3.0.0,<4.0.0",
 						"pulumi-aws": ">=7.0.0,<8.0.0",

@@ -6,7 +6,7 @@ import * as utilities from "./utilities";
 
 export class NatInstance extends pulumi.ComponentResource {
     /** @internal */
-    public static readonly __pulumiType = 'nat:index:NatInstance';
+    public static readonly __pulumiType = 'natinstance:index:NatInstance';
 
     /**
      * Returns true if the given object is an instance of NatInstance.  This is designed to work even
