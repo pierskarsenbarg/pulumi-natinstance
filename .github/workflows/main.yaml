@@ -45,5 +45,11 @@ jobs:
         uses: jaxxstorm/action-install-gh-release@v2.1.0
         with:
           repo: pulumi/pulumictl
+      - name: Lint
+        uses: golangci/golangci-lint-action@v9
+        with:
+          version: latest
+      - name: Lint
+        run: task lint
       - name: build sdk
         run: task build_sdks
