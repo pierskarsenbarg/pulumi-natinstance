@@ -84,6 +84,13 @@ tasks:
     vars:
       TMPDIR:
         sh: mktemp -d
+  build_sdks:
+    deps: [build_provider]
+    cmds: 
+      - task: generate_dotnet_sdk
+      - task: generate_go_sdk
+      - task: generate_nodejs_sdk
+      - task: generate_python_sdk
   install_provider:
     deps: [build_provider]
     cmds:
