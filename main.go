@@ -1,3 +1,4 @@
+// Command pulumi-resource-nat is the entrypoint for the nat Pulumi provider.
 package main
 
 import (
