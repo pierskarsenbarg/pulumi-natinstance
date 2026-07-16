@@ -9,6 +9,9 @@ updates:
       prefix: "provider"
       include: "scope"
     directory: "/"
+    ignore:
+      - dependency-name: "github.com/pulumi/pulumi/pkg/v3"
+      - dependency-name: "github.com/pulumi/pulumi/sdk/v3"
     groups:
       modules:
         applies-to: version-updates
