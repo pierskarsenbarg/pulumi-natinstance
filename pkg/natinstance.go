@@ -33,12 +33,11 @@ func (fna *NatInstanceArgs) Annotate(a infer.Annotator) {
 
 type NatInstanceState struct {
 	pulumi.ResourceState
-	InstanceId pulumi.StringOutput `pulumi:"instanceId"`
-	SubnetId   pulumi.StringOutput `pulumi:"subnetId"`
+	SecurityGroupId pulumi.IDOutput `pulumi:"securityGroupId"`
 }
 
 func (kca *NatInstanceState) Annotate(a infer.Annotator) {
-	a.Describe(&kca.InstanceId, "Instance Id of the EC2 instance")
+	a.Describe(&kca.SecurityGroupId, "Security group ID to attach to any resource that needs to send traffic through the NAT instance")
 }
 
 func hasPublicRoute(routes []ec2.GetRouteTableRoute) bool {
@@ -112,40 +111,53 @@ func (f *NatInstance) Construct(ctx *pulumi.Context, name, typ string, args NatI
 		})
 	}
 
-	routeTableIds := ec2.GetRouteTablesOutput(ctx, ec2.GetRouteTablesOutputArgs{
-		VpcId: vpc.Id(),
-	})
-
-	vpcHasMultipleRoutes := pulumi.All(routeTableIds.Ids(), vpc.MainRouteTableId()).ApplyT(
-		func(args []any) bool {
-			routeTblIds := args[0].([]string)
-			vpcMainRouteTableId := args[1].(string)
-			if len(routeTblIds) == 1 && vpcMainRouteTableId == routeTblIds[0] {
-				return false
-			}
-			return true
+	var subnetId pulumi.StringOutput
+	if args.SubnetId != nil {
+		subnetId = args.SubnetId.ToStringOutput()
+	} else {
+		routeTableIds := ec2.GetRouteTablesOutput(ctx, ec2.GetRouteTablesOutputArgs{
+			VpcId: vpc.Id(),
 		})
 
-	subnetIds := pulumi.All(vpcHasMultipleRoutes, routeTableIds.Ids(), vpc.Id()).ApplyT(
-		func(args []any) []string {
-			var subnetIds []string
-			multipleRoutes := args[0].(bool)
-			routeTbleIds := args[1].([]string)
-			if multipleRoutes {
-				subnetIds, _ = getSubnetsFromRouteTableIds(routeTbleIds, ctx)
-				slices.Sort(subnetIds)
-			} else {
-				vpcId := args[2].(string)
-				subnetIds, _ = getSubnetIdsFromVpcId(vpcId, ctx)
-			}
-			slices.Sort(subnetIds)
-			return subnetIds
-		}).(pulumi.StringArrayOutput)
+		vpcHasMultipleRoutes := pulumi.All(routeTableIds.Ids(), vpc.MainRouteTableId()).ApplyT(
+			func(args []any) bool {
+				routeTblIds := args[0].([]string)
+				vpcMainRouteTableId := args[1].(string)
+				if len(routeTblIds) == 1 && vpcMainRouteTableId == routeTblIds[0] {
+					return false
+				}
+				return true
+			})
 
-	subnetId := subnetIds.Index(pulumi.Int(0))
+		subnetIds := pulumi.All(vpcHasMultipleRoutes, routeTableIds.Ids(), vpc.Id()).ApplyT(
+			func(args []any) ([]string, error) {
+				var subnetIds []string
+				var err error
+				multipleRoutes := args[0].(bool)
+				routeTbleIds := args[1].([]string)
+				if multipleRoutes {
+					subnetIds, err = getSubnetsFromRouteTableIds(routeTbleIds, ctx)
+				} else {
+					vpcId := args[2].(string)
+					subnetIds, err = getSubnetIdsFromVpcId(vpcId, ctx)
+				}
+				if err != nil {
+					return nil, err
+				}
+				slices.Sort(subnetIds)
+				return subnetIds, nil
+			}).(pulumi.StringArrayOutput)
+
+		subnetId = subnetIds.Index(pulumi.Int(0))
+	}
+
+	ingressCidr := vpc.CidrBlock()
+	if args.Cidr != nil {
+		ingressCidr = args.Cidr.ToStringOutput()
+	}
 
 	securitygroup, err := ec2.NewSecurityGroup(ctx, fmt.Sprintf("%s-natsecuritygroup", name), &ec2.SecurityGroupArgs{
-		VpcId:       args.VpcId,
+		VpcId:       vpc.Id(),
 		Description: pulumi.String("Security group for FCK NAT instance"),
 	}, pulumi.Parent(comp))
 	if err != nil {
@@ -154,7 +166,7 @@ func (f *NatInstance) Construct(ctx *pulumi.Context, name, typ string, args NatI
 
 	_, err = vpcModule.NewSecurityGroupIngressRule(ctx, "ingress", &vpcModule.SecurityGroupIngressRuleArgs{
 		SecurityGroupId: securitygroup.ID(),
-		CidrIpv4:        vpc.CidrBlock(),
+		CidrIpv4:        ingressCidr,
 		FromPort:        pulumi.Int(0),
 		ToPort:          pulumi.Int(0),
 		IpProtocol:      pulumi.String("-1"),
@@ -291,7 +303,7 @@ func (f *NatInstance) Construct(ctx *pulumi.Context, name, typ string, args NatI
 		return nil, err
 	}
 
-	_, err = autoscaling.NewGroup(ctx, "asg", &autoscaling.GroupArgs{
+	_, err = autoscaling.NewGroup(ctx, fmt.Sprintf("%s-asg", name), &autoscaling.GroupArgs{
 		MaxSize:         pulumi.Int(1),
 		MinSize:         pulumi.Int(1),
 		DesiredCapacity: pulumi.Int(1),
@@ -306,6 +318,8 @@ func (f *NatInstance) Construct(ctx *pulumi.Context, name, typ string, args NatI
 	if err != nil {
 		return nil, err
 	}
+
+	comp.SecurityGroupId = securitygroup.ID()
 
 	return comp, nil
 }
