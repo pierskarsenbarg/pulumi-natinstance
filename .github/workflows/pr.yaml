@@ -1,7 +1,7 @@
 name: pr
 on:
   pull_request:
-    
+
 jobs:
   build_sdks:
     name: Build SDKs
@@ -29,6 +29,8 @@ jobs:
           python-version: "3.11"
       - name: Install Pulumi CLI
         uses: pulumi/actions@v6
+        with:
+          pulumi-version: latest
       - name: Install Task
         uses: arduino/setup-task@v2
         with:
