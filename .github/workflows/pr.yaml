@@ -9,8 +9,8 @@ jobs:
     steps:
       - name: Checkout Repo
         uses: actions/checkout@v4
-      - name: Unshallow clone for tags
-        run: git fetch --prune --unshallow --tags
+      # - name: Unshallow clone for tags
+      #   run: git fetch --prune --unshallow --tags
       - name: Install Go
         uses: actions/setup-go@v6
         with:
@@ -40,5 +40,7 @@ jobs:
         uses: jaxxstorm/action-install-gh-release@v2.1.0
         with:
           repo: pulumi/pulumictl
+      - name: Lint
+        run: task lint
       - name: build sdk
         run: task build_sdks

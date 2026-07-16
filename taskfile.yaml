@@ -22,6 +22,9 @@ tasks:
     cmds:
       - go mod tidy
       - go build -o bin/{{.PROVIDER}} -ldflags "-X {{.PROJECT}}/{{.VERSION_PATH}}={{.VERSION}}"
+  lint:
+    cmds:
+      - golangci-lint run ./...
   get_schema:
     deps: [build_provider]
     cmds:
