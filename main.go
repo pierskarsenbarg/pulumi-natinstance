@@ -16,8 +16,13 @@ import (
 	"github.com/pulumi/pulumi/sdk/v3/go/common/tokens"
 )
 
+var (
+	Version      = "0.0.1"
+	providerName = "nat"
+)
+
 func main() {
-	err := p.RunProvider(context.Background(), "nat", "0.1.0", provider())
+	err := p.RunProvider(context.Background(), providerName, Version, provider())
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error: %s", err.Error())
 		os.Exit(1)
@@ -27,7 +32,7 @@ func main() {
 func provider() p.Provider {
 	return infer.Provider(infer.Options{
 		Metadata: schema.Metadata{
-			DisplayName: "nat",
+			DisplayName: providerName,
 			Description: "Pulumi Component to create a nat gateway",
 			LanguageMap: map[string]any{
 				"go": gen.GoPackageInfo{
