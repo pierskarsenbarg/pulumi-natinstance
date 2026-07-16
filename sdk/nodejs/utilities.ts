@@ -53,7 +53,7 @@ export function getVersion(): string {
 
 /** @internal */
 export function resourceOptsDefaults(): any {
-    return { version: getVersion(), pluginDownloadURL: "github://api.github.com/pierskarsenbarg/pulumi-fcknat" };
+    return { version: getVersion(), pluginDownloadURL: "github://api.github.com/pierskarsenbarg/pulumi-nat" };
 }
 
 /** @internal */
@@ -68,6 +68,7 @@ export function lazyLoad(exports: any, props: string[], loadModule: any) {
     }
 }
 
+/** @internal */
 export async function callAsync<T>(
     tok: string,
     props: pulumi.Inputs,

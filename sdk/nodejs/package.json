@@ -1,21 +1,21 @@
 {
-    "name": "@pierskarsenbarg/fcknat",
+    "name": "@pierskarsenbarg/nat",
     "version": "${VERSION}",
     "scripts": {
         "build": "tsc"
     },
     "dependencies": {
-        "@pulumi/aws": "^6.48.0",
+        "@pulumi/aws": "^7.0.0",
         "@pulumi/pulumi": "^3.0.0"
     },
     "devDependencies": {
         "@types/mime": "^2.0.0",
         "@types/node": "^10.0.0",
-        "typescript": "^4.3.5"
+        "typescript": "^4.7.0"
     },
     "pulumi": {
         "resource": true,
-        "name": "fcknat",
-        "server": "github://api.github.com/pierskarsenbarg/pulumi-fcknat"
+        "name": "nat",
+        "server": "github://api.github.com/pierskarsenbarg/pulumi-nat"
     }
 }

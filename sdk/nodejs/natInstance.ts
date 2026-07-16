@@ -6,7 +6,7 @@ import * as utilities from "./utilities";
 
 export class NatInstance extends pulumi.ComponentResource {
     /** @internal */
-    public static readonly __pulumiType = 'fcknat:index:NatInstance';
+    public static readonly __pulumiType = 'nat:index:NatInstance';
 
     /**
      * Returns true if the given object is an instance of NatInstance.  This is designed to work even
@@ -22,8 +22,8 @@ export class NatInstance extends pulumi.ComponentResource {
     /**
      * Instance Id of the EC2 instance
      */
-    public /*out*/ readonly instanceId!: pulumi.Output<string>;
-    public readonly subnetId!: pulumi.Output<string>;
+    declare public /*out*/ readonly instanceId: pulumi.Output<string>;
+    declare public readonly subnetId: pulumi.Output<string>;
 
     /**
      * Create a NatInstance resource with the given unique name, arguments, and options.
@@ -36,13 +36,13 @@ export class NatInstance extends pulumi.ComponentResource {
         let resourceInputs: pulumi.Inputs = {};
         opts = opts || {};
         if (!opts.id) {
-            if ((!args || args.instanceType === undefined) && !opts.urn) {
+            if (args?.instanceType === undefined && !opts.urn) {
                 throw new Error("Missing required property 'instanceType'");
             }
-            resourceInputs["cidr"] = args ? args.cidr : undefined;
-            resourceInputs["instanceType"] = args ? args.instanceType : undefined;
-            resourceInputs["subnetId"] = args ? args.subnetId : undefined;
-            resourceInputs["vpcId"] = args ? args.vpcId : undefined;
+            resourceInputs["cidr"] = args?.cidr;
+            resourceInputs["instanceType"] = args?.instanceType;
+            resourceInputs["subnetId"] = args?.subnetId;
+            resourceInputs["vpcId"] = args?.vpcId;
             resourceInputs["instanceId"] = undefined /*out*/;
         } else {
             resourceInputs["instanceId"] = undefined /*out*/;
@@ -60,7 +60,7 @@ export interface NatInstanceArgs {
     /**
      * CIDR blocks that you want the NAT instance to be available to. Will use the CIDR block for the VPC otherwise
      */
-    cidr?: pulumi.Input<string>;
+    cidr?: pulumi.Input<string | undefined>;
     /**
      * Instance type of the NAT instance
      */
@@ -68,9 +68,9 @@ export interface NatInstanceArgs {
     /**
      * Public subnet ID where the NAT instance will be created. If not specified then one will be selected from the VPC.
      */
-    subnetId?: pulumi.Input<string>;
+    subnetId?: pulumi.Input<string | undefined>;
     /**
      * Id of the VPC that the NAT instance will be inside. Will select the default VPC for the region if not set.
      */
-    vpcId?: pulumi.Input<string>;
+    vpcId?: pulumi.Input<string | undefined>;
 }

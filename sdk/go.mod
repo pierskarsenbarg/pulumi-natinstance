@@ -1,6 +1,6 @@
 module github.com/pierskarsenbarg/pulumi-fcknat/sdk
 
-go 1.23.0
+go 1.26.0
 
 require (
 	github.com/blang/semver v3.5.1+incompatible

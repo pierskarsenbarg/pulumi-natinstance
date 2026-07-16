@@ -1,5 +1,0 @@
-{
-  "resource": true,
-  "name": "fcknat",
-  "server": "github://api.github.com/pierskarsenbarg/pulumi-fcknat"
-}
