@@ -28,7 +28,7 @@ jobs:
         with:
           python-version: "3.11"
       - name: Install Pulumi CLI
-        uses: pulumi/actions@v6
+        uses: pulumi/actions@v7
         with:
           pulumi-version: latest
       - name: Install Task
