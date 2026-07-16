@@ -4,7 +4,7 @@ go 1.26.0
 
 require (
 	github.com/google/uuid v1.6.0
-	github.com/pulumi/pulumi-aws/sdk/v6 v6.80.0
+	github.com/pulumi/pulumi-aws/sdk/v6 v6.83.4
 	github.com/pulumi/pulumi-dotnet/pulumi-language-dotnet/v3 v3.107.3
 	github.com/pulumi/pulumi-go-provider v1.4.0
 	github.com/pulumi/pulumi/pkg/v3 v3.250.0
