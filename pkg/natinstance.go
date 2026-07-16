@@ -18,10 +18,11 @@ import (
 type NatInstance struct{}
 
 type NatInstanceArgs struct {
-	InstanceType pulumi.StringInput `pulumi:"instanceType"`
-	VpcId        pulumi.StringInput `pulumi:"vpcId,optional"`
-	Cidr         pulumi.StringInput `pulumi:"cidr,optional"`
-	SubnetId     pulumi.StringInput `pulumi:"subnetId,optional"`
+	InstanceType pulumi.StringInput    `pulumi:"instanceType"`
+	VpcId        pulumi.StringInput    `pulumi:"vpcId,optional"`
+	Cidr         pulumi.StringInput    `pulumi:"cidr,optional"`
+	SubnetId     pulumi.StringInput    `pulumi:"subnetId,optional"`
+	Tags         pulumi.StringMapInput `pulumi:"tags,optional"`
 }
 
 func (fna *NatInstanceArgs) Annotate(a infer.Annotator) {
@@ -29,6 +30,7 @@ func (fna *NatInstanceArgs) Annotate(a infer.Annotator) {
 	a.Describe(&fna.VpcId, "Id of the VPC that the NAT instance will be inside. Will select the default VPC for the region if not set.")
 	a.Describe(&fna.Cidr, "CIDR blocks that you want the NAT instance to be available to. Will use the CIDR block for the VPC otherwise")
 	a.Describe(&fna.SubnetId, "Public subnet ID where the NAT instance will be created. If not specified then one will be selected from the VPC.")
+	a.Describe(&fna.Tags, "Tags to apply to the resources created by the NAT instance")
 }
 
 type NatInstanceState struct {
@@ -159,28 +161,31 @@ func (f *NatInstance) Construct(ctx *pulumi.Context, name, typ string, args NatI
 	securitygroup, err := ec2.NewSecurityGroup(ctx, fmt.Sprintf("%s-natsecuritygroup", name), &ec2.SecurityGroupArgs{
 		VpcId:       vpc.Id(),
 		Description: pulumi.String("Security group for FCK NAT instance"),
+		Tags:        args.Tags,
 	}, pulumi.Parent(comp))
 	if err != nil {
 		return nil, err
 	}
 
-	_, err = vpcModule.NewSecurityGroupIngressRule(ctx, "ingress", &vpcModule.SecurityGroupIngressRuleArgs{
+	_, err = vpcModule.NewSecurityGroupIngressRule(ctx, fmt.Sprintf("%s-ingress", name), &vpcModule.SecurityGroupIngressRuleArgs{
 		SecurityGroupId: securitygroup.ID(),
 		CidrIpv4:        ingressCidr,
 		FromPort:        pulumi.Int(0),
 		ToPort:          pulumi.Int(0),
 		IpProtocol:      pulumi.String("-1"),
+		Tags:            args.Tags,
 	}, pulumi.Parent(securitygroup))
 	if err != nil {
 		return nil, err
 	}
 
-	_, err = vpcModule.NewSecurityGroupEgressRule(ctx, "egress", &vpcModule.SecurityGroupEgressRuleArgs{
+	_, err = vpcModule.NewSecurityGroupEgressRule(ctx, fmt.Sprintf("%s-egress", name), &vpcModule.SecurityGroupEgressRuleArgs{
 		SecurityGroupId: securitygroup.ID(),
 		CidrIpv4:        pulumi.String("0.0.0.0/0"),
 		FromPort:        pulumi.Int(0),
 		ToPort:          pulumi.Int(0),
 		IpProtocol:      pulumi.String("-1"),
+		Tags:            args.Tags,
 	}, pulumi.Parent(securitygroup))
 	if err != nil {
 		return nil, err
@@ -190,6 +195,7 @@ func (f *NatInstance) Construct(ctx *pulumi.Context, name, typ string, args NatI
 		SubnetId:        subnetId,
 		SecurityGroups:  pulumi.StringArray{securitygroup.ID()},
 		SourceDestCheck: pulumi.BoolPtr(false),
+		Tags:            args.Tags,
 	}, pulumi.Parent(comp))
 	if err != nil {
 		return nil, err
@@ -219,6 +225,7 @@ func (f *NatInstance) Construct(ctx *pulumi.Context, name, typ string, args NatI
 	// Create IAM Role
 	natRole, err := iam.NewRole(ctx, fmt.Sprintf("%s-fckRole", name), &iam.RoleArgs{
 		AssumeRolePolicy: pulumi.String(assumeRolePolicy.Json),
+		Tags:             args.Tags,
 	}, pulumi.Parent(comp))
 	if err != nil {
 		return nil, err
@@ -257,6 +264,7 @@ func (f *NatInstance) Construct(ctx *pulumi.Context, name, typ string, args NatI
 
 	instanceProfile, err := iam.NewInstanceProfile(ctx, fmt.Sprintf("%s-instanceprofile", name), &iam.InstanceProfileArgs{
 		Role: natRole.Name,
+		Tags: args.Tags,
 	}, pulumi.Parent(comp))
 	if err != nil {
 		return nil, err
@@ -298,9 +306,25 @@ func (f *NatInstance) Construct(ctx *pulumi.Context, name, typ string, args NatI
 			securitygroup.ID(),
 		},
 		UserData: useDataB64,
+		Tags:     args.Tags,
 	}, pulumi.Parent(comp))
 	if err != nil {
 		return nil, err
+	}
+
+	var asgTags autoscaling.GroupTagArrayInput
+	if args.Tags != nil {
+		asgTags = args.Tags.ToStringMapOutput().ApplyT(func(tags map[string]string) []autoscaling.GroupTag {
+			groupTags := make([]autoscaling.GroupTag, 0, len(tags))
+			for k, v := range tags {
+				groupTags = append(groupTags, autoscaling.GroupTag{
+					Key:               k,
+					Value:             v,
+					PropagateAtLaunch: true,
+				})
+			}
+			return groupTags
+		}).(autoscaling.GroupTagArrayOutput)
 	}
 
 	_, err = autoscaling.NewGroup(ctx, fmt.Sprintf("%s-asg", name), &autoscaling.GroupArgs{
@@ -314,6 +338,7 @@ func (f *NatInstance) Construct(ctx *pulumi.Context, name, typ string, args NatI
 		VpcZoneIdentifiers: pulumi.StringArray{
 			subnetId,
 		},
+		Tags: asgTags,
 	}, pulumi.Parent(comp))
 	if err != nil {
 		return nil, err
