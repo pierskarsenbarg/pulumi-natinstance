@@ -1,1 +1,1 @@
-Pulumi Component to create a nat gateway
+# Pulumi Component Resource for NAT instance replacement

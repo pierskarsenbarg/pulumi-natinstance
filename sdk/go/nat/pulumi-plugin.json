@@ -1,5 +1,0 @@
-{
-  "resource": true,
-  "name": "nat",
-  "server": "github://api.github.com/pierskarsenbarg/pulumi-nat"
-}
