@@ -15,9 +15,8 @@ import (
 type NatInstance struct {
 	pulumi.ResourceState
 
-	// Instance Id of the EC2 instance
-	InstanceId pulumi.StringOutput `pulumi:"instanceId"`
-	SubnetId   pulumi.StringOutput `pulumi:"subnetId"`
+	// Security group ID to attach to any resource that needs to send traffic through the NAT instance
+	SecurityGroupId pulumi.StringOutput `pulumi:"securityGroupId"`
 }
 
 // NewNatInstance registers a new resource with the given unique name, arguments, and options.
@@ -99,13 +98,9 @@ func (o NatInstanceOutput) ToNatInstanceOutputWithContext(ctx context.Context) N
 	return o
 }
 
-// Instance Id of the EC2 instance
-func (o NatInstanceOutput) InstanceId() pulumi.StringOutput {
-	return o.ApplyT(func(v *NatInstance) pulumi.StringOutput { return v.InstanceId }).(pulumi.StringOutput)
-}
-
-func (o NatInstanceOutput) SubnetId() pulumi.StringOutput {
-	return o.ApplyT(func(v *NatInstance) pulumi.StringOutput { return v.SubnetId }).(pulumi.StringOutput)
+// Security group ID to attach to any resource that needs to send traffic through the NAT instance
+func (o NatInstanceOutput) SecurityGroupId() pulumi.StringOutput {
+	return o.ApplyT(func(v *NatInstance) pulumi.StringOutput { return v.SecurityGroupId }).(pulumi.StringOutput)
 }
 
 func init() {
