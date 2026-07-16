@@ -14,13 +14,10 @@ namespace PiersKarsenbarg.Natinstance
     public partial class NatInstance : global::Pulumi.ComponentResource
     {
         /// <summary>
-        /// Instance Id of the EC2 instance
+        /// Security group ID to attach to any resource that needs to send traffic through the NAT instance
         /// </summary>
-        [Output("instanceId")]
-        public Output<string> InstanceId { get; private set; } = null!;
-
-        [Output("subnetId")]
-        public Output<string> SubnetId { get; private set; } = null!;
+        [Output("securityGroupId")]
+        public Output<string> SecurityGroupId { get; private set; } = null!;
 
 
         /// <summary>

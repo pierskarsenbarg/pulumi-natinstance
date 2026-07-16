@@ -20,10 +20,9 @@ export class NatInstance extends pulumi.ComponentResource {
     }
 
     /**
-     * Instance Id of the EC2 instance
+     * Security group ID to attach to any resource that needs to send traffic through the NAT instance
      */
-    declare public /*out*/ readonly instanceId: pulumi.Output<string>;
-    declare public readonly subnetId: pulumi.Output<string>;
+    declare public /*out*/ readonly securityGroupId: pulumi.Output<string>;
 
     /**
      * Create a NatInstance resource with the given unique name, arguments, and options.
@@ -43,10 +42,9 @@ export class NatInstance extends pulumi.ComponentResource {
             resourceInputs["instanceType"] = args?.instanceType;
             resourceInputs["subnetId"] = args?.subnetId;
             resourceInputs["vpcId"] = args?.vpcId;
-            resourceInputs["instanceId"] = undefined /*out*/;
+            resourceInputs["securityGroupId"] = undefined /*out*/;
         } else {
-            resourceInputs["instanceId"] = undefined /*out*/;
-            resourceInputs["subnetId"] = undefined /*out*/;
+            resourceInputs["securityGroupId"] = undefined /*out*/;
         }
         opts = pulumi.mergeOptions(utilities.resourceOptsDefaults(), opts);
         super(NatInstance.__pulumiType, name, resourceInputs, opts, true /*remote*/);

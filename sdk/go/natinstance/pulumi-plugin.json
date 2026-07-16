@@ -1,5 +1,6 @@
 {
   "resource": true,
   "name": "natinstance",
+  "version": "0.0.1",
   "server": "github://api.github.com/pierskarsenbarg/pulumi-natinstance"
 }

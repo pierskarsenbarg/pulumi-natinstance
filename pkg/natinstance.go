@@ -33,7 +33,7 @@ func (fna *NatInstanceArgs) Annotate(a infer.Annotator) {
 
 type NatInstanceState struct {
 	pulumi.ResourceState
-	SecurityGroupId pulumi.IDOutput `pulumi:"securityGroupId"`
+	SecurityGroupId pulumi.StringOutput `pulumi:"securityGroupId"`
 }
 
 func (kca *NatInstanceState) Annotate(a infer.Annotator) {
@@ -319,7 +319,7 @@ func (f *NatInstance) Construct(ctx *pulumi.Context, name, typ string, args NatI
 		return nil, err
 	}
 
-	comp.SecurityGroupId = securitygroup.ID()
+	comp.SecurityGroupId = securitygroup.ID().ToStringOutput()
 
 	return comp, nil
 }

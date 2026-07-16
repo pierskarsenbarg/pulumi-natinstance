@@ -1,0 +1,1 @@
+# Pulumi Component Resource for NAT instance replacement
