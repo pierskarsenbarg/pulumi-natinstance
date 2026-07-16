@@ -36,6 +36,8 @@ jobs:
           python-version: "3.11"
       - name: Install Pulumi CLI
         uses: pulumi/actions@v7
+        with:
+          pulumi-version: latest
       - name: Install Task
         uses: arduino/setup-task@v3
         with:
