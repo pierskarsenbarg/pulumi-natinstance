@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/pierskarsenbarg/pulumi-nat/pkg"
+	"github.com/pierskarsenbarg/pulumi-natinstance/pkg"
 	dotnetgen "github.com/pulumi/pulumi-dotnet/pulumi-language-dotnet/v3/codegen"
 	p "github.com/pulumi/pulumi-go-provider"
 	"github.com/pulumi/pulumi-go-provider/infer"
@@ -19,7 +19,7 @@ import (
 
 var (
 	Version      = "0.0.1"
-	providerName = "nat"
+	providerName = "natinstance"
 )
 
 func main() {
@@ -34,13 +34,13 @@ func provider() p.Provider {
 	return infer.Provider(infer.Options{
 		Metadata: schema.Metadata{
 			DisplayName: providerName,
-			Description: "Pulumi Component to create a nat gateway",
+			Description: "Pulumi Component to create a nat instance",
 			LanguageMap: map[string]any{
 				"go": gen.GoPackageInfo{
-					ImportBasePath: "github.com/pierskarsenbarg/pulumi-nat/sdk/go/nat",
+					ImportBasePath: fmt.Sprintf("github.com/pierskarsenbarg/pulumi-%s/sdk/go/%s", providerName, providerName),
 				},
 				"nodejs": nodejsgen.NodePackageInfo{
-					PackageName: "@pierskarsenbarg/nat",
+					PackageName: fmt.Sprintf("@pierskarsenbarg/%s", providerName),
 					Dependencies: map[string]string{
 						"@pulumi/pulumi": "^3.0.0",
 						"@pulumi/aws":    "^7.0.0",
@@ -62,10 +62,10 @@ func provider() p.Provider {
 						"pulumi":     ">=3.0.0,<4.0.0",
 						"pulumi-aws": ">=7.0.0,<8.0.0",
 					},
-					PackageName: "pierskarsenbarg_pulumi_nat",
+					PackageName: fmt.Sprintf("pierskarsenbarg_pulumi_%s", providerName),
 				},
 			},
-			PluginDownloadURL: "github://api.github.com/pierskarsenbarg/pulumi-nat",
+			PluginDownloadURL: fmt.Sprintf("github://api.github.com/pierskarsenbarg/pulumi-%s", providerName),
 			Publisher:         "Piers Karsenbarg",
 		},
 		ModuleMap: map[tokens.ModuleName]tokens.ModuleName{

@@ -1,9 +1,8 @@
-module github.com/pierskarsenbarg/pulumi-nat
+module github.com/pierskarsenbarg/pulumi-natinstance
 
 go 1.26.0
 
 require (
-	github.com/google/uuid v1.6.0
 	github.com/pulumi/pulumi-aws/sdk/v6 v6.83.4
 	github.com/pulumi/pulumi-dotnet/pulumi-language-dotnet/v3 v3.107.3
 	github.com/pulumi/pulumi-go-provider v1.4.0
@@ -45,6 +44,7 @@ require (
 	github.com/go-logr/stdr v1.2.2 // indirect
 	github.com/gogo/protobuf v1.3.2 // indirect
 	github.com/golang/glog v1.2.5 // indirect
+	github.com/google/uuid v1.6.0 // indirect
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.29.0 // indirect
 	github.com/grpc-ecosystem/grpc-opentracing v0.0.0-20180507213350-8e809c8a8645 // indirect
 	github.com/hashicorp/errwrap v1.1.0 // indirect

@@ -1,3 +1,4 @@
+// Package pkg implements the NatInstance component resource.
 package pkg
 
 import (
