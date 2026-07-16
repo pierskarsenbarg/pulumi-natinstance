@@ -1,1 +1,1 @@
-Pulumi Component to create a FCK-NAT based nat gateway
+Pulumi Component to create a nat gateway

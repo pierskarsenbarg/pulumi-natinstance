@@ -4,7 +4,7 @@
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <Authors>Piers Karsenbarg</Authors>
     <Company>Piers Karsenbarg</Company>
-    <Description>Pulumi Component to create a FCK-NAT based nat gateway</Description>
+    <Description>Pulumi Component to create a nat gateway</Description>
     <PackageLicenseExpression></PackageLicenseExpression>
     <PackageProjectUrl></PackageProjectUrl>
     <RepositoryUrl></RepositoryUrl>
@@ -45,7 +45,7 @@
 
   <ItemGroup>
     <PackageReference Include="Pulumi" Version="3.*" />
-    <PackageReference Include="Pulumi.Aws" Version="6.*" ExcludeAssets="contentFiles" />
+    <PackageReference Include="Pulumi.Aws" Version="7.*" ExcludeAssets="contentFiles" />
   </ItemGroup>
 
   <ItemGroup>
