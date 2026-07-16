@@ -18,11 +18,13 @@ import (
 type NatInstance struct{}
 
 type NatInstanceArgs struct {
-	InstanceType pulumi.StringInput    `pulumi:"instanceType"`
-	VpcId        pulumi.StringInput    `pulumi:"vpcId,optional"`
-	Cidr         pulumi.StringInput    `pulumi:"cidr,optional"`
-	SubnetId     pulumi.StringInput    `pulumi:"subnetId,optional"`
-	Tags         pulumi.StringMapInput `pulumi:"tags,optional"`
+	InstanceType               pulumi.StringInput      `pulumi:"instanceType"`
+	VpcId                      pulumi.StringInput      `pulumi:"vpcId,optional"`
+	Cidr                       pulumi.StringInput      `pulumi:"cidr,optional"`
+	SubnetId                   pulumi.StringInput      `pulumi:"subnetId,optional"`
+	Tags                       pulumi.StringMapInput   `pulumi:"tags,optional"`
+	PrivateRouteTableIds       pulumi.StringArrayInput `pulumi:"privateRouteTableIds,optional"`
+	AutoWirePrivateRouteTables pulumi.BoolInput        `pulumi:"autoWirePrivateRouteTables,optional"`
 }
 
 func (fna *NatInstanceArgs) Annotate(a infer.Annotator) {
@@ -31,6 +33,11 @@ func (fna *NatInstanceArgs) Annotate(a infer.Annotator) {
 	a.Describe(&fna.Cidr, "CIDR blocks that you want the NAT instance to be available to. Will use the CIDR block for the VPC otherwise")
 	a.Describe(&fna.SubnetId, "Public subnet ID where the NAT instance will be created. If not specified then one will be selected from the VPC.")
 	a.Describe(&fna.Tags, "Tags to apply to the resources created by the NAT instance")
+	a.Describe(&fna.PrivateRouteTableIds,
+		"Route table IDs that should route 0.0.0.0/0 through this NAT instance. If not set, no routes are created.")
+	a.Describe(&fna.AutoWirePrivateRouteTables,
+		"If true, route 0.0.0.0/0 through this NAT instance for every route table in the VPC with no internet gateway route. "+
+			"Combined with privateRouteTableIds if both are set. Defaults to false.")
 }
 
 type NatInstanceState struct {
@@ -90,6 +97,27 @@ func getSubnetsFromRouteTableIds(routeTableIds []string, ctx *pulumi.Context) ([
 	}
 
 	return subnetIds, nil
+}
+
+func getPrivateRouteTableIds(routeTableIds []string, ctx *pulumi.Context) ([]string, error) {
+	var privateRouteTableIds []string
+	for _, id := range routeTableIds {
+		routeTable, err := ec2.LookupRouteTable(ctx, &ec2.LookupRouteTableArgs{
+			Filters: []ec2.GetRouteTableFilter{
+				{
+					Name:   "route-table-id",
+					Values: []string{id},
+				},
+			},
+		})
+		if err != nil {
+			return nil, err
+		}
+		if !hasPublicRoute(routeTable.Routes) {
+			privateRouteTableIds = append(privateRouteTableIds, id)
+		}
+	}
+	return privateRouteTableIds, nil
 }
 
 func (f *NatInstance) Construct(ctx *pulumi.Context, name, typ string, args NatInstanceArgs, opts pulumi.ResourceOption) (
@@ -200,6 +228,53 @@ func (f *NatInstance) Construct(ctx *pulumi.Context, name, typ string, args NatI
 	if err != nil {
 		return nil, err
 	}
+
+	explicitRouteTableIds := pulumi.StringArray{}.ToStringArrayOutput()
+	if args.PrivateRouteTableIds != nil {
+		explicitRouteTableIds = args.PrivateRouteTableIds.ToStringArrayOutput()
+	}
+
+	autoWirePrivateRouteTables := pulumi.Bool(false).ToBoolOutput()
+	if args.AutoWirePrivateRouteTables != nil {
+		autoWirePrivateRouteTables = args.AutoWirePrivateRouteTables.ToBoolOutput()
+	}
+
+	pulumi.All(explicitRouteTableIds, autoWirePrivateRouteTables, vpc.Id()).ApplyT(
+		func(a []any) (bool, error) {
+			explicitIds := a[0].([]string)
+			autoWire := a[1].(bool)
+			vpcId := a[2].(string)
+
+			routeTableIds := explicitIds
+			if autoWire {
+				allRouteTableIds, err := ec2.GetRouteTables(ctx, &ec2.GetRouteTablesArgs{VpcId: &vpcId})
+				if err != nil {
+					return false, err
+				}
+				discoveredIds, err := getPrivateRouteTableIds(allRouteTableIds.Ids, ctx)
+				if err != nil {
+					return false, err
+				}
+				routeTableIds = append(routeTableIds, discoveredIds...)
+			}
+
+			seen := make(map[string]bool, len(routeTableIds))
+			for _, routeTableId := range routeTableIds {
+				if seen[routeTableId] {
+					continue
+				}
+				seen[routeTableId] = true
+				_, err := ec2.NewRoute(ctx, fmt.Sprintf("%s-private-route-%s", name, routeTableId), &ec2.RouteArgs{
+					RouteTableId:         pulumi.String(routeTableId),
+					DestinationCidrBlock: pulumi.String("0.0.0.0/0"),
+					NetworkInterfaceId:   natInterface.ID(),
+				}, pulumi.Parent(comp))
+				if err != nil {
+					return false, err
+				}
+			}
+			return true, nil
+		})
 
 	assumeRolePolicy, err := iam.GetPolicyDocument(ctx, &iam.GetPolicyDocumentArgs{
 		Statements: []iam.GetPolicyDocumentStatement{
