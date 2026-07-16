@@ -81,6 +81,18 @@ tasks:
       - task: dotnet_sdk
       - task: go_sdk
       - task: python_sdk
+  install_provider:
+    deps: [build_provider]
+    cmds:
+      - export PATH="$(pwd)/bin:$PATH" 
+  install_nodejs:
+    deps: [build_sdks]
+    cmds:
+      - |
+        cd {{.SDK_DIR}}/nodejs/ && \
+          yarn install && \
+          yarn run tsc && \
+          yarn link --cwd ./sdk/nodejs/bin
   watch:
     watch: true
     sources:
