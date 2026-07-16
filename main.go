@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/pierskarsenbarg/pulumi-nat/pkg"
+	"github.com/pierskarsenbarg/pulumi-natinstance/pkg"
 	dotnetgen "github.com/pulumi/pulumi-dotnet/pulumi-language-dotnet/v3/codegen"
 	p "github.com/pulumi/pulumi-go-provider"
 	"github.com/pulumi/pulumi-go-provider/infer"
