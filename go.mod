@@ -1,4 +1,4 @@
-module github.com/pierskarsenbarg/pulumi-nat
+module github.com/pierskarsenbarg/pulumi-natinstance
 
 go 1.26.0
 

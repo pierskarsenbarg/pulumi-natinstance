@@ -1,1 +1,1 @@
-# Base provider boilerplate
+# Pulumi Component Resource for NAT instance replacement

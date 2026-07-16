@@ -4,7 +4,7 @@ vars:
   VERSION:
     sh: pulumictl get version
   VERSION_PATH: main.Version
-  PROVIDER_NAME: nat
+  PROVIDER_NAME: natinstance
   PROVIDER: pulumi-resource-{{.PROVIDER_NAME}}
   PROJECT: github.com/pierskarsenbarg/pulumi-{{.PROVIDER_NAME}}
   SDK_DIR: sdk
