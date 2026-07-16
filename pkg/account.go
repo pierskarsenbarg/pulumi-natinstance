@@ -1,3 +1,4 @@
+// Package pkg implements the resources and components exposed by the nat provider.
 package pkg
 
 import (

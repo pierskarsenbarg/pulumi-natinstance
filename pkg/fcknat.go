@@ -4,7 +4,6 @@ import (
 	"encoding/base64"
 	"fmt"
 	"slices"
-	"sort"
 	"strings"
 
 	"github.com/pulumi/pulumi-aws/sdk/v6/go/aws/autoscaling"
@@ -64,7 +63,7 @@ func getSubnetIdsFromVpcId(vpcId string, ctx *pulumi.Context) ([]string, error) 
 }
 
 func getSubnetsFromRouteTableIds(routeTableIds []string, ctx *pulumi.Context) ([]string, error) {
-	routeTablesMap := make(map[string]interface{})
+	routeTablesMap := make(map[string]any)
 	var subnetIds []string
 	for _, id := range routeTableIds {
 		routeTable, err := ec2.LookupRouteTable(ctx, &ec2.LookupRouteTableArgs{
@@ -117,7 +116,7 @@ func (f *NatInstance) Construct(ctx *pulumi.Context, name, typ string, args NatI
 	})
 
 	vpcHasMultipleRoutes := pulumi.All(routeTableIds.Ids(), vpc.MainRouteTableId()).ApplyT(
-		func(args []interface{}) bool {
+		func(args []any) bool {
 			routeTblIds := args[0].([]string)
 			vpcMainRouteTableId := args[1].(string)
 			if len(routeTblIds) == 1 && vpcMainRouteTableId == routeTblIds[0] {
@@ -127,22 +126,18 @@ func (f *NatInstance) Construct(ctx *pulumi.Context, name, typ string, args NatI
 		})
 
 	subnetIds := pulumi.All(vpcHasMultipleRoutes, routeTableIds.Ids(), vpc.Id()).ApplyT(
-		func(args []interface{}) []string {
+		func(args []any) []string {
 			var subnetIds []string
 			multipleRoutes := args[0].(bool)
 			routeTbleIds := args[1].([]string)
 			if multipleRoutes {
 				subnetIds, _ = getSubnetsFromRouteTableIds(routeTbleIds, ctx)
-				sort.Slice(subnetIds, func(a, b int) bool {
-					return subnetIds[a] < subnetIds[b]
-				})
+				slices.Sort(subnetIds)
 			} else {
 				vpcId := args[2].(string)
 				subnetIds, _ = getSubnetIdsFromVpcId(vpcId, ctx)
 			}
-			sort.Slice(subnetIds, func(a, b int) bool {
-				return subnetIds[a] < subnetIds[b]
-			})
+			slices.Sort(subnetIds)
 			return subnetIds
 		}).(pulumi.StringArrayOutput)
 
@@ -266,7 +261,7 @@ func (f *NatInstance) Construct(ctx *pulumi.Context, name, typ string, args NatI
 		Owners: []string{
 			"568608671756",
 		},
-		MostRecent: pulumi.BoolRef(true),
+		MostRecent: new(true),
 		Filters: []ec2.GetAmiFilter{
 			{
 				Name: "name",

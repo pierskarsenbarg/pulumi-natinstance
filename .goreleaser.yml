@@ -1,0 +1,65 @@
+version: 2
+
+project_name: pulumi-nat
+
+before:
+  hooks:
+    - go mod tidy
+
+builds:
+  - id: pulumi-resource-nat
+    main: .
+    binary: pulumi-resource-nat
+    ldflags:
+      - -s -w -X main.version={{.Version}}
+    goos:
+      - linux
+      - darwin
+      - windows
+    goarch:
+      - amd64
+      - arm64
+    ignore:
+      - goos: windows
+        goarch: arm64
+
+archives:
+  - id: pulumi-resource-nat
+    ids:
+      - pulumi-resource-nat
+    name_template: "pulumi-resource-nat-v{{ .Version }}-{{ .Os }}-{{ .Arch }}"
+    formats: ["tar.gz"]
+    format_overrides:
+      - goos: windows
+        formats: ["zip"]
+
+changelog:
+  sort: asc
+  use: github
+  filters:
+    exclude:
+      - "^docs:"
+      - "^test:"
+      - "^chore:"
+      - "^ci:"
+      - "^build:"
+      - "^style:"
+      - "^refactor:"
+      - Merge pull request
+      - Merge branch
+  groups:
+    - title: "New Features"
+      regexp: "^feat"
+      order: 0
+    - title: "Bug Fixes"
+      regexp: "^fix"
+      order: 1
+    - title: "Other Changes"
+      order: 999
+
+release:
+  github:
+    owner: pierskarsenbarg
+    name: pulumi-nat
+  name_template: "{{ .Tag }}"
+  prerelease: auto
